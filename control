@@ -1,10 +1,10 @@
-Package: com.rpetrich.fastblurrednotificationcenter
-Name: FastBlurredNotificationCenter
-Version: 0.1
+Package: com.pathkiller.nccolors
+Name: NCColors
+Version: 0.5-1a
 Architecture: iphoneos-arm
-Description: More efficient version of BlurriedNCBackground
-Maintainer: Ryan Petrich <rpetrich+fastblurrednotificationcenter@gmail.com>
-Author: Ryan Petrich <rpetrich+fastblurrednotificationcenter@gmail.com>
+Description: Change Notication Center Background color.
+Maintainer: PathKiller29 <appleidname@yahoo.com>
+Author: PathKiller29 <appleidname@yahoo.com>
 Depends: mobilesubstrate, firmware (>= 5.0)
 Section: Tweaks
-dev: rpetrich
+dev: PathKiller29
