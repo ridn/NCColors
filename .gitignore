@@ -1,0 +1,11 @@
+<<<<<<< HEAD
+._*
+*.deb
+.DS_Store
+.theos
+=======
+lib/libsubstrate.dylib
+.DS_Store
+._*
+.bootstrap
+>>>>>>> 51ede74b96aea9b21f54e0b0d812179814edfdac

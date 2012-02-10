@@ -1,0 +1,9 @@
+<<<<<<< HEAD
+[submodule "framework"]
+	path = framework
+	url = git://github.com/rpetrich/theos.git
+=======
+[submodule "include"]
+	path = include
+	url = git://github.com/rpetrich/iphoneheaders.git
+>>>>>>> 51ede74b96aea9b21f54e0b0d812179814edfdac

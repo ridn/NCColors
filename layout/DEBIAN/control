@@ -1,0 +1,9 @@
+Package: com.pathkiller.nccolors
+Depends: mobilesubstrate 
+Name: NCColors
+Version: .5-1a
+Architecture: iphoneos-arm
+Description: Change the color of your notification center
+Author: PathKiller29 <appleidname@yahoo.com>
+Section: Tweaks
+dev: PathKiller29
