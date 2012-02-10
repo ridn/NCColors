@@ -15,7 +15,7 @@ Only change made by me is the option to change colors and enable/ disable blurre
 - (id)_initWithIOSurface:(IOSurfaceRef)surface scale:(CGFloat)scale orientation:(UIImageOrientation)orientation;
 @end
 
-//%config(generator=internal)
+%config(generator=internal)
 
 @interface SBBulletinListView : UIView
 + (UIImage *)linen;
@@ -147,8 +147,7 @@ float blueValue = [blue floatValue];
         if (shouldBlur) {
 
 	activeView.alpha = height ? (y / height) : 1.0f;
-    //activeView.center = CGPointMake( self.bounds.origin.x + 160, y + (height/2));
-   // activeView.alpha = 1.0f;
+
 }
 		[self linenView].backgroundColor = [UIColor colorWithRed:redValue green:greenValue blue:blueValue alpha:height ? ((y / height)/2) : .5f];
 
