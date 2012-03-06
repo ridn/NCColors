@@ -24,96 +24,79 @@ Only change made by me is the option to change colors and enable/ disable blurre
 - (void)positionSlidingViewAtY:(CGFloat)y;
 @end
 
+static BOOL enabled;
+static BOOL blur;
 
+static float blue;
+static float red;
+static float green;
+
+static UIView *activeView;
+
+static void loadPrefs()
+{
+	NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithContentsOfFile:@"/var/mobile/Library/Preferences/com.pathkiller.nccolors.plist"];
+	enabled = [[dict objectForKey:@"enabled"] boolValue];
+	blue = [[dict objectForKey:@"B"] floatValue];
+	red = [[dict objectForKey:@"R"] floatValue];
+	green = [[dict objectForKey:@"G"] floatValue];
+	blur = [[dict objectForKey:@"blur"] boolValue];
+	[dict release];
+}
 
 %hook SBBulletinListView
 
-static UIView *activeView;
-static BOOL shouldBlur = NO;
-static BOOL enabled = NO;
-
 + (UIImage *)linen
 {
-NSString *filePath = @"/var/mobile/Library/Preferences/com.pathkiller.nccolors.plist";
-NSMutableDictionary* plistDict = [[NSMutableDictionary alloc] initWithContentsOfFile:filePath];
-enabled = [[plistDict objectForKey:@"enabled"]boolValue];
-
-
-	if (enabled){
-	return nil;
-}else{
-return %orig;
-}
+	if (enabled) {
+		return nil;
+	} else { return %orig; }
 }
 
 - (id)initWithFrame:(CGRect)frame delegate:(id)delegate
 {
-NSString *filePath = @"/var/mobile/Library/Preferences/com.pathkiller.nccolors.plist";
-NSMutableDictionary* plistDict = [[NSMutableDictionary alloc] initWithContentsOfFile:filePath];
-
-NSString *red;
-NSString *green;
-NSString *blue;
-red = [plistDict objectForKey:@"R"];
-green = [plistDict objectForKey:@"G"];
-blue = [plistDict objectForKey:@"B"];
-shouldBlur = [[plistDict objectForKey:@"blur"]boolValue];
-enabled = [[plistDict objectForKey:@"enabled"]boolValue];
-
-
-float redValue = [red floatValue];
-float greenValue = [green floatValue];
-float blueValue = [blue floatValue];
-	
-
-       //blur by ryan petrich 
 	if ((self = %orig)) {
-if(enabled){
-if (shouldBlur) {
-		IOSurfaceRef surface = [UIWindow createScreenIOSurface];
-		UIImageOrientation imageOrientation;
-		switch ([(SpringBoard *)UIApp activeInterfaceOrientation]) {
-			case UIInterfaceOrientationPortrait:
-			default:
-				imageOrientation = UIImageOrientationUp;
-				break;
-			case UIInterfaceOrientationPortraitUpsideDown:
-				imageOrientation = UIImageOrientationDown;
-				break;
-			case UIInterfaceOrientationLandscapeLeft:
-				imageOrientation = UIImageOrientationRight;
-				break;
-			case UIInterfaceOrientationLandscapeRight:
-				imageOrientation = UIImageOrientationLeft;
-				break;
-		}
-		UIImage *image = [[UIImage alloc] _initWithIOSurface:surface scale:[UIScreen mainScreen].scale orientation:imageOrientation];
-		CFRelease(surface);
-		if (!activeView)
-			activeView = [[UIImageView alloc] initWithImage:image];
-		static NSArray *filters;
-		if (!filters) {
-			CAFilter *filter = [CAFilter filterWithType:@"gaussianBlur"];
-			[filter setValue:[NSNumber numberWithFloat:5.0f] forKey:@"inputRadius"];
-			filters = [[NSArray alloc] initWithObjects:filter, nil];
-		}
-
-
-
-        
-		CALayer *layer = activeView.layer;
-		layer.filters = filters;
-		layer.shouldRasterize = YES;
-		activeView.alpha = 0.0f;
-
-		[self insertSubview:activeView atIndex:0];
-
-}
-		[self linenView].backgroundColor = [UIColor colorWithRed:redValue green:greenValue blue:blueValue alpha:0.5f];
-
-}
-}
+	if (enabled) {
+		if (blur) {
+			IOSurfaceRef surface = [UIWindow createScreenIOSurface];
+			UIImageOrientation imageOrientation;
+			switch ([(SpringBoard *)UIApp activeInterfaceOrientation]) {
+				case UIInterfaceOrientationPortrait:
+				default:
+					imageOrientation = UIImageOrientationUp;
+					break;
+				case UIInterfaceOrientationPortraitUpsideDown:
+					imageOrientation = UIImageOrientationDown;
+					break;
+				case UIInterfaceOrientationLandscapeLeft:
+					imageOrientation = UIImageOrientationRight;
+					break;
+				case UIInterfaceOrientationLandscapeRight:
+					imageOrientation = UIImageOrientationLeft;
+					break;
+			}
+			UIImage *image = [[UIImage alloc] _initWithIOSurface:surface scale:[UIScreen mainScreen].scale orientation:imageOrientation];
+			CFRelease(surface);
+			if (!activeView)
+				activeView = [[UIImageView alloc] initWithImage:image];
+			static NSArray *filters;
+			if (!filters) {
+				CAFilter *filter = [CAFilter filterWithType:@"gaussianBlur"];
+				[filter setValue:[NSNumber numberWithFloat:5.0f] forKey:@"inputRadius"];
+				filters = [[NSArray alloc] initWithObjects:filter, nil];
+			}
+			CALayer *layer = activeView.layer;
+			layer.filters = filters;
+			layer.shouldRasterize = YES;
+			activeView.alpha = 0.0f;
 	
+			[self insertSubview:activeView atIndex:0];
+
+		}
+		[self linenView].backgroundColor = [UIColor colorWithRed:red green:green blue:blue alpha:0.5f];
+
+	}
+}
 	return self;
 }
 
@@ -124,34 +107,13 @@ if (shouldBlur) {
 	activeView = nil;
 	%orig;
 }
-
-- (void)positionSlidingViewAtY:(CGFloat)y
-{
-
-NSString *filePath = @"/var/mobile/Library/Preferences/com.pathkiller.nccolors.plist";
-NSMutableDictionary* plistDict = [[NSMutableDictionary alloc] initWithContentsOfFile:filePath];
-NSString *red;
-NSString *green;
-NSString *blue;
-red = [plistDict objectForKey:@"R"];
-green = [plistDict objectForKey:@"G"];
-blue = [plistDict objectForKey:@"B"];
-shouldBlur = [[plistDict objectForKey:@"blur"]boolValue];
-
-
-float redValue = [red floatValue];
-float greenValue = [green floatValue];
-float blueValue = [blue floatValue];
-        	CGFloat height = self.bounds.size.height;
-
-        if (shouldBlur) {
-
-	activeView.alpha = height ? (y / height) : 1.0f;
-
-}
-		[self linenView].backgroundColor = [UIColor colorWithRed:redValue green:greenValue blue:blueValue alpha:height ? ((y / height)/2) : .5f];
-
-	%orig;
-}
-
 %end
+
+%ctor
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	%init;
+	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPrefs, CFSTR("com.pathkiller29.nccolors"), NULL, CFNotificationSuspensionBehaviorCoalesce);
+	loadPrefs();
+	[pool drain];
+}
