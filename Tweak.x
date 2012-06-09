@@ -3,11 +3,11 @@ Open source edit of Ryan Petrich's, open source (…), FastBlurredNotificationCe
 
 Only change made by me is the option to change colors and enable/ disable blurred background.
 */
+NSMutableDictionary* plistDict;
 
 
-
-#import <UIKit/UIKit2.h>
-#import <QuartzCore/QuartzCore2.h>
+//#import <UIKit/UIKit2.h>
+//#import <QuartzCore/QuartzCore2.h>
 #import <SpringBoard/SpringBoard.h>
 #import <IOSurface/IOSurface.h>
 
@@ -28,14 +28,16 @@ Only change made by me is the option to change colors and enable/ disable blurre
 
 %hook SBBulletinListView
 
-static UIView *activeView;
+UIImage *image;
+
+static UIView *screenView;
 static BOOL shouldBlur = NO;
 static BOOL enabled = NO;
 
 + (UIImage *)linen
 {
 NSString *filePath = @"/var/mobile/Library/Preferences/com.pathkiller.nccolors.plist";
-NSMutableDictionary* plistDict = [[NSMutableDictionary alloc] initWithContentsOfFile:filePath];
+plistDict = [[NSMutableDictionary alloc] initWithContentsOfFile:filePath];
 enabled = [[plistDict objectForKey:@"enabled"]boolValue];
 
 
@@ -49,7 +51,7 @@ return %orig;
 - (id)initWithFrame:(CGRect)frame delegate:(id)delegate
 {
 NSString *filePath = @"/var/mobile/Library/Preferences/com.pathkiller.nccolors.plist";
-NSMutableDictionary* plistDict = [[NSMutableDictionary alloc] initWithContentsOfFile:filePath];
+plistDict = [[NSMutableDictionary alloc] initWithContentsOfFile:filePath];
 
 NSString *red;
 NSString *green;
@@ -64,7 +66,6 @@ enabled = [[plistDict objectForKey:@"enabled"]boolValue];
 float redValue = [red floatValue];
 float greenValue = [green floatValue];
 float blueValue = [blue floatValue];
-	
 
        //blur by ryan petrich 
 	if ((self = %orig)) {
@@ -87,10 +88,10 @@ if (shouldBlur) {
 				imageOrientation = UIImageOrientationLeft;
 				break;
 		}
-		UIImage *image = [[UIImage alloc] _initWithIOSurface:surface scale:[UIScreen mainScreen].scale orientation:imageOrientation];
+		image = [[UIImage alloc] _initWithIOSurface:surface scale:[UIScreen mainScreen].scale orientation:imageOrientation];
 		CFRelease(surface);
-		if (!activeView)
-			activeView = [[UIImageView alloc] initWithImage:image];
+		if (!screenView)
+			screenView = [[UIImageView alloc] initWithImage:image];
 		static NSArray *filters;
 		if (!filters) {
 			CAFilter *filter = [CAFilter filterWithType:@"gaussianBlur"];
@@ -101,12 +102,12 @@ if (shouldBlur) {
 
 
         
-		CALayer *layer = activeView.layer;
+		CALayer *layer = screenView.layer;
 		layer.filters = filters;
 		layer.shouldRasterize = YES;
-		activeView.alpha = 0.0f;
+		screenView.alpha = 0.0f;
 
-		[self insertSubview:activeView atIndex:0];
+		[self insertSubview:screenView atIndex:0];
 
 }
 		[self linenView].backgroundColor = [UIColor colorWithRed:redValue green:greenValue blue:blueValue alpha:0.5f];
@@ -120,16 +121,21 @@ if (shouldBlur) {
 
 - (void)dealloc
 {
-	[activeView release];
-	activeView = nil;
+	[screenView removeFromSuperview];
+	[screenView release];
+	screenView = nil;
+	[plistDict release];
+	plistDict = nil;
+	[image release];
+	image = nil;
+
 	%orig;
 }
-
-- (void)positionSlidingViewAtY:(CGFloat)y
+-(void)positionSlidingViewAtY:(CGFloat)y
 {
 
 NSString *filePath = @"/var/mobile/Library/Preferences/com.pathkiller.nccolors.plist";
-NSMutableDictionary* plistDict = [[NSMutableDictionary alloc] initWithContentsOfFile:filePath];
+plistDict = [[NSMutableDictionary alloc] initWithContentsOfFile:filePath];
 NSString *red;
 NSString *green;
 NSString *blue;
@@ -146,8 +152,9 @@ float blueValue = [blue floatValue];
 
         if (shouldBlur) {
 
-	activeView.alpha = height ? (y / height) : 1.0f;
-
+	screenView.alpha = height ? (y / height) : 1.0f;
+    //screenView.center = CGPointMake( self.bounds.origin.x + 160, y + (height/2));
+   // screenView.alpha = 1.0f;
 }
 		[self linenView].backgroundColor = [UIColor colorWithRed:redValue green:greenValue blue:blueValue alpha:height ? ((y / height)/2) : .5f];
 
